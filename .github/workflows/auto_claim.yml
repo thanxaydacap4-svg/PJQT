@@ -1,0 +1,25 @@
+name: Auto Claim Potion
+
+on:
+  schedule:
+    # Tự động chạy mỗi 1 tiếng 1 lần
+    - cron: '0 * * * *'
+  workflow_dispatch: # Nút bấm chạy test thủ công bất cứ lúc nào
+
+jobs:
+  auto_claim:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Script
+        env:
+          PJQT_HEADERS: ${{ secrets.PJQT_HEADERS }}
+        run: |
+          python main.py
