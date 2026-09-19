@@ -43,12 +43,7 @@ def send_claim_request(headers: dict):
     print(f"[*] User: {headers.get('x-qookia-user') or headers.get('X-QOOKIA-USER')}")
     
     req_headers = {str(k): str(v) for k, v in headers.items()}
-    # Luôn làm mới timestamp hiện tại
-    now_str = str(int(time.time()))
-    if "x-qookia-time" in req_headers:
-        req_headers["x-qookia-time"] = now_str
-    elif "X-QOOKIA-TIME" in req_headers:
-        req_headers["X-QOOKIA-TIME"] = now_str
+   
 
     req = urllib.request.Request(CLAIM_URL, data=b"", headers=req_headers, method="POST")
     try:
