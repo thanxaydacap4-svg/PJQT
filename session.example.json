@@ -1,0 +1,9 @@
+{
+  "user_id": "YOUR_GAME_USER_ID",
+  "token": "TOKEN_FROM_AUTH_LOGIN_USER_RESPONSE",
+  "nkid": "YOUR_NUTAKU_ID",
+  "device_id": "YOUR_DEVICE_ID",
+  "server_prefix": "YOUR_SERVER_PREFIX",
+  "build_version": "29.0.0.867",
+  "channel": "Qookia"
+}
