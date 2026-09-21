@@ -4,22 +4,49 @@ on:
   schedule:
     # Tự động chạy mỗi 1 tiếng 1 lần
     - cron: '0 * * * *'
-  workflow_dispatch: # Nút bấm chạy test thủ công bất cứ lúc nào
+  workflow_dispatch:
+    inputs:
+      claim:
+        description: 'Receive earned Potion (false only checks the account)'
+        type: boolean
+        default: false
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pjqt-explore-collector
+  cancel-in-progress: false
 
 jobs:
   auto_claim:
+    # Enable only after a successful manual check and claim on this runner.
+    if: github.event_name == 'workflow_dispatch' || vars.PJQT_AUTO_CLAIM_ENABLED == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      - name: Test collector
+        run: python -m unittest discover -s tests -v
+
       - name: Run Script
         env:
-          PJQT_HEADERS: ${{ secrets.PJQT_HEADERS }}
+          PJQT_SESSION: ${{ secrets.PJQT_SESSION }}
+          PJQT_EVENT_ID: '11'
+          CLAIM_ENABLED: ${{ github.event_name == 'schedule' || inputs.claim }}
         run: |
-          python main.py
+          if [ "$CLAIM_ENABLED" = "true" ]; then
+            python main.py --claim
+          else
+            python main.py
+          fi
