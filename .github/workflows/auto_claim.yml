@@ -3,7 +3,7 @@ name: Auto Claim Potion
 on:
   schedule:
     # Tự động chạy mỗi 1 tiếng 1 lần
-    - cron: '0 * * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
     inputs:
       claim:
