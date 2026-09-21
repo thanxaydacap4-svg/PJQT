@@ -12,14 +12,45 @@ Actions, không cần bật máy cá nhân khi đã cấu hình phiên hợp l�
    để kiểm tra phiên và số chu kỳ tích lũy từ GitHub runner.
 4. Khi kiểm tra thành công và đã có Potion để nhận, chạy lại với `claim` được chọn.
    Xác nhận log có `COLLECTED` và số lượng nhận được.
-5. Tạo repository variable **`PJQT_AUTO_CLAIM_ENABLED`** với giá trị **`true`** để
-   bật tự nhận mỗi giờ theo lịch có sẵn. Đổi thành `false` để tắt tự nhận theo lịch.
+5. Thiết lập lịch gọi workflow từ **cron-job.org** theo phần dưới. Bật job sau khi
+   một lượt thử từ dịch vụ này đã gọi được GitHub và hoàn tất bước `Run Script`.
 
 Workflow dùng event **11**, đã được người dùng chọn. Không dùng lại secret
 `PJQT_HEADERS`: chữ ký được tính lại từ token đăng nhập cho mỗi request.
 
-Lịch GitHub có thể trễ hoặc bỏ lượt khi tải cao; xem
-[tài liệu schedule](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
+## Lịch tự động qua cron-job.org
+
+GitHub vẫn chạy script và giữ secret game; cron-job.org chỉ gọi API để kích hoạt
+workflow. Lịch `schedule` cũ trên GitHub được bỏ khi chuyển sang dịch vụ này.
+
+Tạo **fine-grained personal access token** trên GitHub: chỉ chọn repo `PJQT`,
+quyền **Actions: Read and write** (Metadata chỉ đọc là quyền bắt buộc). Ghi nhớ
+ngày hết hạn để thay token trước khi lịch ngừng kích hoạt được workflow.
+
+Cấu hình job trên cron-job.org:
+
+- URL: `https://api.github.com/repos/thanxaydacap4-svg/PJQT/actions/workflows/auto_claim.yml/dispatches`.
+- Method: `POST`; body: `{"ref":"main","inputs":{"claim":true}}`.
+- Lịch: `35 * * * *`, múi giờ `Asia/Bangkok` (UTC+7).
+- Header `Authorization`: `Bearer <TOKEN_GITHUB>`.
+- Header `Accept`: `application/vnd.github+json`.
+- Header `Content-Type`: `application/json`.
+- Header `X-GitHub-Api-Version`: `2026-03-10`.
+- Bật **Save responses in job history** để đối chiếu kết quả gọi GitHub.
+
+Không ghi token thật vào repo hoặc chat. Token game `PJQT_SESSION` chỉ lưu trên
+GitHub; header Authorization ở cron-job.org dùng token GitHub riêng.
+
+Kiểm tra cả hai nơi: HTTP thành công ở cron-job.org chứng minh GitHub nhận yêu
+cầu, còn log **Run Script** trên GitHub mới cho biết đã nhận Potion, chưa đủ
+chu kỳ hay phiên game hết hạn. Những lượt này có event `workflow_dispatch` nên
+GitHub có thể ghi **Manually run** dù được cron-job.org gọi tự động; đối chiếu
+với lịch sử thực thi theo lịch của cron-job.org.
+
+Để tạm dừng tự nhận, tắt **Enable job** trên cron-job.org. Biến cũ
+`PJQT_AUTO_CLAIM_ENABLED` không điều khiển các lượt gọi qua API này.
+Khi token GitHub hết hạn hoặc bị thu hồi, cập nhật header Authorization của
+job; khi game báo `11009 REQUIRE_LOGIN`, cập nhật secret `PJQT_SESSION`.
 
 ## Phiên đăng nhập
 
