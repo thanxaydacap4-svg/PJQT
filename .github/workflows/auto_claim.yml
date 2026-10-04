@@ -37,7 +37,7 @@ jobs:
       - name: Run Script
         env:
           PJQT_SESSION: ${{ secrets.PJQT_SESSION }}
-          PJQT_EVENT_ID: '11'
+          PJQT_EVENT_ID: '12'
           CLAIM_ENABLED: ${{ inputs.claim }}
         run: |
           if [ "$CLAIM_ENABLED" = "true" ]; then
